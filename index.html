@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Functional groups</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="app">
+  <header>
+    <div><h1 data-i18n="title"></h1><p data-i18n="sub"></p></div>
+    <select class="lang" aria-label="Language"><option value="en">English</option><option value="fi">Suomi</option><option value="sv">Svenska</option></select>
+  </header>
+
+  <section class="card">
+    <div class="bar">
+      <div id="levels" class="seg" role="group"></div>
+      <label class="sw"><input type="checkbox" id="auto"> <span data-i18n="auto"></span></label>
+      <button id="cmp" data-i18n="cmp"></button>
+    </div>
+    <div class="stage"><canvas id="cv"></canvas></div>
+    <p class="hint" id="hint"></p>
+    <div id="chips" class="chips"></div>
+    <p id="msg" aria-live="polite"></p>
+    <div class="btns">
+      <button id="chk" class="pri" data-i18n="chk"></button>
+      <button id="ans" data-i18n="ans"></button>
+      <button id="nxt" data-i18n="nxt"></button>
+    </div>
+    <div class="foot">
+      <div id="stat"></div>
+      <div><button id="lic" class="ghost" data-i18n="lic"></button> <button id="ket" class="ghost" data-i18n="ket"></button></div>
+    </div>
+  </section>
+</main>
+
+<dialog id="consent" aria-labelledby="ct">
+  <div class="dh"><h2 id="ct" data-i18n="ctitle"></h2>
+    <select class="lang" aria-label="Language"><option value="en">English</option><option value="fi">Suomi</option><option value="sv">Svenska</option></select></div>
+  <p data-i18n="cintro"></p>
+  <ul><li data-i18n="c1"></li><li data-i18n="c2"></li><li data-i18n="c3"></li><li data-i18n="c4"></li></ul>
+  <p><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener" data-i18n="clink"></a></p>
+  <p id="declined" class="bad" hidden data-i18n="declined"></p>
+  <div class="btns"><button id="agree" class="pri" autofocus data-i18n="agree"></button><button id="decline" data-i18n="decline"></button></div>
+</dialog>
+
+<dialog id="cd">
+  <div class="dh"><strong data-i18n="cmp"></strong><button id="cx" data-i18n="close"></button></div>
+  <div class="seg"><button id="tj" aria-pressed="true" data-i18n="join"></button><button id="th" aria-pressed="false" data-i18n="host"></button></div>
+  <section id="pj">
+    <label><span data-i18n="name"></span><input id="cn" type="text" maxlength="16" autocomplete="off"></label>
+    <label><span data-i18n="code"></span><input id="cc" type="text" maxlength="14" autocomplete="off"></label>
+    <p id="cm" class="bad"></p>
+    <button id="cs" class="pri" data-i18n="start"></button>
+  </section>
+  <section id="ph" hidden>
+    <p class="hint" data-i18n="hinfo"></p>
+    <div class="two">
+      <label><span data-i18n="diff"></span><select id="hl"><option value="1" data-i18n="lv1"></option><option value="2" data-i18n="lv2"></option><option value="3" data-i18n="lv3"></option><option value="4" data-i18n="lv4"></option><option value="R" data-i18n="ramp"></option></select></label>
+      <label><span data-i18n="mins"></span><input id="hm" type="number" min="1" max="60" value="10"></label>
+    </div>
+    <button id="hc" class="pri" data-i18n="create"></button>
+    <label><span data-i18n="code"></span><input id="hk" type="text" maxlength="14" autocomplete="off"></label>
+    <label><span data-i18n="rcin"></span><textarea id="hr" rows="3"></textarea></label>
+    <div class="btns"><button id="ha" data-i18n="add"></button><button id="hz" data-i18n="clear"></button></div>
+    <p id="hmsg" class="bad"></p>
+    <table id="lb"></table>
+  </section>
+</dialog>
+
+<dialog id="ed">
+  <h2 data-i18n="endt"></h2><p id="es"></p>
+  <textarea id="ec" rows="3" readonly></textarea>
+  <div class="btns"><button id="ecp" class="pri" data-i18n="copy"></button><button id="ex" data-i18n="close"></button></div>
+</dialog>
+
+<dialog id="kd" class="kd"><div class="dh"><strong>Ketcher</strong><button id="kx" data-i18n="close"></button></div><iframe id="kf" title="Ketcher"></iframe></dialog>
+
+<script src="i18n.js"></script>
+<script src="chem.js"></script>
+<script src="comp.js"></script>
+<script src="app.js"></script>
+<script>
+addEventListener('load', function () {
+  if (!document.querySelector('#chips button'))
+    document.body.innerHTML = '<p style="font:16px system-ui;padding:24px;max-width:560px">Some files did not load. Extract the whole zip first (right-click → Extract All), then open index.html from the extracted folder, or use the GitHub Pages link.<br><br>Joitakin tiedostoja ei ladattu. Pura koko zip ensin (hiiren oikea → Pura kaikki) ja avaa index.html puretusta kansiosta.<br><br>Vissa filer laddades inte. Packa först upp hela zip-filen och öppna sedan index.html från den uppackade mappen.</p>';
+});
+</script>
+</body>
+</html>
