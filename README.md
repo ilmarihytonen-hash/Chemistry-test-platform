@@ -7,11 +7,6 @@ Kemian harjoitus: tunnista satunnaisesti luodun molekyylin funktionaaliset ryhm�
 - **Avaa Ketcherissä** kopioi Molfilen ja avaa [EPAM Ketcherin](https://github.com/epam/ketcher).
 - Testi: `node test.js`
 
-## GitHub Pages
-1. Luo repo ja työnnä tiedostot `main`-haaraan.
-2. Settings → Pages → Source: **GitHub Actions**.
-3. Sivu julkaistaan osoitteeseen `https://<käyttäjä>.github.io/<repo>/`.
-
 ## Languages, license and terms
 - UI in **English, Finnish and Swedish** (`i18n.js`); the language is picked from the browser and can be changed at any time.
 - On first load the user must accept the **GPLv3 license and terms of use** (stored in `localStorage` under `fgq-consent-2`; bump the key to ask again).
