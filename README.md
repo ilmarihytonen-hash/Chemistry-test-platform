@@ -40,6 +40,4 @@ Without the folder it falls back to copy and paste.
 - When an answer is shown, each group is **colour-coded** in the structure and in the group names.
 
 ## Version and feedback
-- Edit `version.js` (`APP_VERSION`, currently `beta`) for each release; it appears in the bottom-right corner and in bug reports.
 - **Feedback / bug report** opens a pre-filled GitHub issue form (`.github/ISSUE_TEMPLATE/`) with version, language, browser and a molecule ID. On GitHub Pages the repository is detected automatically; otherwise set `APP_REPO` in `version.js`.
-- Open `index.html?mol=<ID>` to see exactly the molecule from a report.
