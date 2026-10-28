@@ -52,3 +52,9 @@ dialog textarea{resize:vertical;font-family:monospace;font-size:.8rem}
 dialog .seg{display:inline-flex;margin-bottom:6px}
 table{width:100%;border-collapse:collapse;margin-top:12px}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+td button{padding:3px 8px;font-size:.8rem;margin-right:4px}
+details{margin-top:14px}summary{cursor:pointer;color:var(--mute)}
+[hidden]{display:none!important}
+.ansl{display:flex;flex-wrap:wrap;gap:4px 18px;margin:12px 0 0;font-weight:700}
+.ansl:empty{display:none}
+.ver{position:fixed;right:10px;bottom:8px;font-size:.75rem;color:var(--mute);opacity:.85;pointer-events:none}

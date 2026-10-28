@@ -2,19 +2,20 @@
 /* Funktionaaliset ryhmät – molekyyligeneraattori, tunnistin ja Molfile-vienti */
 (function (root) {
   const L = 46, D = Math.PI / 180, VAL = { C: 4, O: 2, N: 3, H: 1 };
-  const GROUPS = [
-    { id: 'OH', name: 'Hydroksyyliryhmä' }, { id: 'COOH', name: 'Karboksyylihapporyhmä' },
-    { id: 'CC_DOUBLE', name: 'Hiili-hiili -kaksoissidos' }, { id: 'BENZENE', name: 'Bentseenirengas' },
-    { id: 'ETHER', name: 'Eetteriryhmä' }, { id: 'ESTER', name: 'Esteriryhmä' },
-    { id: 'AMINE', name: 'Aminoryhmä' }, { id: 'AMIDE', name: 'Amidiryhmä' }, { id: 'ALDEHYDE', name: 'Aldehydiryhmä' }
+  const GROUPS = [ // c = väri vastauksen värikoodauksessa
+    { id: 'OH', c: '#ff9f43' }, { id: 'PHENOL', c: '#fb7185' }, { id: 'COOH', c: '#ef4444' },
+    { id: 'CC_DOUBLE', c: '#c3f26b' }, { id: 'CC_TRIPLE', c: '#7ee787' }, { id: 'BENZENE', c: '#2dd4bf' },
+    { id: 'ETHER', c: '#38bdf8' }, { id: 'ESTER', c: '#6c8cff' }, { id: 'AMINE', c: '#a78bfa' },
+    { id: 'AMIDE', c: '#e879f9' }, { id: 'ALDEHYDE', c: '#ffd93d' }, { id: 'KETONE', c: '#d4a373' }
   ];
   const ALL = GROUPS.map(g => g.id), BASIC = ['OH', 'AMINE', 'COOH', 'CC_DOUBLE', 'BENZENE'];
-  // Vaikeustasot: ketjun pituus, ryhmien määrä, sallitut ryhmät, bentseenin sivuryhmä
+  const MID = BASIC.concat('ALDEHYDE', 'KETONE', 'ETHER', 'CC_TRIPLE');
+  // Vaikeustasot: ketjun pituus, ryhmien määrä, sallitut ryhmät, bentseenin sivuryhmä (tasot 3–4: vaihtoehtoja ei näytetä)
   const LEVELS = [
-    { name: 'Helppo', n: [3, 4], k: [1, 1], pool: BASIC, para: 0 },
-    { name: 'Keskitaso', n: [4, 5], k: [2, 2], pool: BASIC.concat('ALDEHYDE', 'ETHER'), para: 0 },
-    { name: 'Vaikea', n: [5, 7], k: [3, 3], pool: ALL, para: 0.4 },
-    { name: 'Asiantuntija', n: [6, 8], k: [4, 4], pool: ALL, para: 0.8 }
+    { n: [3, 4], k: [1, 1], pool: BASIC, para: 0 },
+    { n: [4, 5], k: [2, 2], pool: MID, para: 0 },
+    { n: [5, 7], k: [3, 3], pool: ALL, para: 0.4 },
+    { n: [6, 8], k: [4, 4], pool: ALL, para: 0.8 }
   ];
   const ri = ([a, b], r) => a + Math.floor(r() * (b - a + 1));
   const shuffle = (a, r) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -23,28 +24,41 @@
     return VAL[m.atoms[i].e] - m.bonds.reduce((s, b) => s + (b[0] === i || b[1] === i ? b[2] : 0), 0);
   }
 
-  // Tunnistaa ryhmät pelkästään atomi-/sidosgraafista (vastaus ei riipu siitä, miten molekyyli luotiin)
-  function detect(m) {
-    const A = m.atoms, B = m.bonds, F = new Set();
+  // Tunnistaa ryhmät graafista ja palauttaa ryhmä → [atomijoukot] (käytetään myös värikoodaukseen)
+  function groupsOf(m) {
+    const A = m.atoms, B = m.bonds, G = {};
+    const put = (id, ...a) => (G[id] = G[id] || []).push(a);
     const nb = i => B.filter(b => b[0] === i || b[1] === i).map(b => ({ j: b[0] === i ? b[1] : b[0], o: b[2], ar: b[3] }));
+    const ar = i => nb(i).some(n => n.ar);
     const co = i => A[i].e === 'C' && nb(i).some(n => n.o === 2 && A[n.j].e === 'O');
     const plainC = n => n.o === 1 && A[n.j].e === 'C' && !co(n.j);
     A.forEach((a, i) => {
       const N = nb(i);
       if (co(i)) {
-        const O = N.find(n => n.o === 1 && A[n.j].e === 'O'), Nn = N.find(n => A[n.j].e === 'N');
-        const C = N.filter(n => A[n.j].e === 'C').length;
-        if (Nn) F.add('AMIDE'); else if (O) F.add(nb(O.j).length === 1 ? 'COOH' : 'ESTER');
-        else F.add(C === 1 ? 'ALDEHYDE' : 'KETONE');
+        const dO = N.find(n => n.o === 2 && A[n.j].e === 'O').j, O = N.find(n => n.o === 1 && A[n.j].e === 'O');
+        const Nn = N.find(n => A[n.j].e === 'N'), H = N.find(n => A[n.j].e === 'H'), Cs = N.filter(n => A[n.j].e === 'C').length;
+        if (Nn) put('AMIDE', i, dO, Nn.j);
+        else if (O) put(nb(O.j).length === 1 ? 'COOH' : 'ESTER', i, dO, O.j);
+        else if (Cs === 1) put('ALDEHYDE', ...[i, dO].concat(H ? [H.j] : []));
+        else put('KETONE', i, dO);
       }
-      if (a.e === 'O' && N.length === 1 && plainC(N[0])) F.add('OH');
-      if (a.e === 'O' && N.length === 2 && N.every(plainC)) F.add('ETHER');
-      if (a.e === 'N' && N.every(plainC)) F.add('AMINE');
-      if (N.some(n => n.ar)) F.add('BENZENE');
+      if (a.e === 'O' && N.length === 1 && plainC(N[0])) put(ar(N[0].j) ? 'PHENOL' : 'OH', i, N[0].j);
+      if (a.e === 'O' && N.length === 2 && N.every(plainC)) put('ETHER', i, N[0].j, N[1].j);
+      if (a.e === 'N' && N.every(plainC)) put('AMINE', i, ...N.map(n => n.j));
     });
-    B.forEach(b => { if (b[2] === 2 && !b[3] && A[b[0]].e === 'C' && A[b[1]].e === 'C') F.add('CC_DOUBLE'); });
-    return F;
+    B.forEach(b => {
+      if (!b[3] && A[b[0]].e === 'C' && A[b[1]].e === 'C') { if (b[2] === 2) put('CC_DOUBLE', b[0], b[1]); if (b[2] === 3) put('CC_TRIPLE', b[0], b[1]); }
+    });
+    const seen = new Set();
+    A.forEach((_, i) => {
+      if (seen.has(i) || !ar(i)) return;
+      const st = [i], set = []; seen.add(i);
+      while (st.length) { const x = st.pop(); set.push(x); nb(x).forEach(n => { if (n.ar && !seen.has(n.j)) { seen.add(n.j); st.push(n.j); } }); }
+      put('BENZENE', ...set);
+    });
+    return G;
   }
+  const detect = m => new Set(Object.keys(groupsOf(m)));
 
   function segDist(p, a, b) {
     const dx = b.x - a.x, dy = b.y - a.y, t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
@@ -68,14 +82,32 @@
     const add = (e, x, y) => atoms.push({ e, x, y }) - 1;
     const bond = (a, b, o = 1, ar = false) => bonds.push([a, b, o, ar]);
     const grow = (i, e, t, o = 1, len = L) => { const j = add(e, atoms[i].x + len * Math.cos(t * D), atoms[i].y + len * Math.sin(t * D)); bond(i, j, o); return j; };
-    for (let i = 0; i < n; i++) { add('C', i * L * 0.866, (i % 2) * -L / 2); if (i) bond(i - 1, i); }
-    const head = { i: 0, t: -150 }, tail = { i: n - 1, t: (n - 1) % 2 ? 30 : -30 };
-    let slots = shuffle([head, tail].concat(Array.from({ length: n - 2 }, (_, k) => ({ i: k + 1, t: (k + 1) % 2 ? -90 : 90 }))), r);
+    const slots = shuffle(Array.from({ length: n }, (_, i) => ({ i, k: i === 0 ? 'h' : i === n - 1 ? 't' : 's' })), r);
     const take = pred => { const j = slots.findIndex(pred); return j < 0 ? null : slots.splice(j, 1)[0]; };
+    const used = [], plan = [], order = new Array(n - 1).fill(1);
+    for (const id of ids) {
+      if (id === 'CC_DOUBLE' || id === 'CC_TRIPLE') continue;
+      const sl = id === 'BENZENE' ? take(x => x.k !== 's') : id === 'KETONE' ? take(x => x.k === 's') : take(() => true);
+      if (!sl) return null; used.push(sl.i); plan.push([id, sl]);
+    }
+    for (const id of ids) { // moninkertaiset sidokset vain hiileille, joilla ei ole muuta ryhmää
+      if (id !== 'CC_DOUBLE' && id !== 'CC_TRIPLE') continue;
+      const c = []; for (let b = 0; b < n - 1; b++) if (!used.includes(b) && !used.includes(b + 1)) c.push(b);
+      if (!c.length) return null;
+      const b = c[Math.floor(r() * c.length)]; order[b] = id === 'CC_TRIPLE' ? 3 : 2; used.push(b, b + 1);
+    }
+    // Ketju: siksak ±30°; kolmoissidoksen atomit ovat suoraan linjassa naapureidensa kanssa
+    const lin = i => (i > 0 && order[i - 1] === 3) || (i < n - 1 && order[i] === 3);
+    const dirs = [-30]; let sg = 1;
+    for (let j = 1; j < n - 1; j++) { if (lin(j)) dirs.push(dirs[j - 1]); else { dirs.push(dirs[j - 1] + 60 * sg); sg = -sg; } }
+    add('C', 0, 0); for (let i = 0; i < n - 1; i++) grow(i, 'C', dirs[i], order[i]);
+    const tOf = sl => sl.k === 'h' ? dirs[0] + 240 : sl.k === 't' ? dirs[n - 2] + 60 * sg
+      : Math.atan2(Math.sin(dirs[sl.i - 1] * D) - Math.sin(dirs[sl.i] * D), Math.cos(dirs[sl.i - 1] * D) - Math.cos(dirs[sl.i] * D)) / D;
     const frag = (id, i, t, s) => {
       switch (id) {
         case 'OH': grow(i, 'O', t); break;
         case 'AMINE': grow(i, 'N', t); break;
+        case 'KETONE': grow(i, 'O', t, 2); break;
         case 'COOH': { const c = grow(i, 'C', t); grow(c, 'O', t + 60 * s, 2); grow(c, 'O', t - 60 * s); break; }
         case 'ALDEHYDE': { const c = grow(i, 'C', t); grow(c, 'O', t + 60 * s, 2); grow(c, 'H', t - 60 * s, 1, L * 0.6); break; }
         case 'AMIDE': { const c = grow(i, 'C', t); grow(c, 'O', t + 60 * s, 2); grow(c, 'N', t - 60 * s); break; }
@@ -90,32 +122,25 @@
         }
       }
     };
-    const used = [], plan = [];
-    for (const id of ids) {
-      if (id === 'CC_DOUBLE') continue;
-      const sl = id === 'BENZENE' ? take(x => x === head || x === tail) : take(() => true);
-      if (!sl) return null; used.push(sl.i); plan.push([id, sl]);
-    }
-    if (ids.includes('CC_DOUBLE')) { // kaksoissidos vain hiileen, jolla ei ole muuta ryhmää
-      const c = []; for (let b = 0; b < n - 1; b++) if (!used.includes(b) && !used.includes(b + 1)) c.push(b);
-      if (!c.length) return null; bonds[c[Math.floor(r() * c.length)]][2] = 2;
-    }
-    plan.forEach(([id, sl]) => frag(id, sl.i, sl.t, r() < 0.5 ? 1 : -1));
+    plan.forEach(([id, sl]) => frag(id, sl.i, tOf(sl), r() < 0.5 ? 1 : -1));
     return { atoms, bonds, rings };
   }
 
-  // Satunnainen molekyyli annetulle tasolle. Palauttaa vain molekyylin, jonka tunnistettu ryhmäjoukko
-  // täsmää tarkoitettuihin ryhmiin ja jossa ei ole päällekkäisyyksiä tai väärää valenssia.
+  // Satunnainen molekyyli annetulle tasolle. Palautetaan vain molekyyli, jonka tunnistettu ryhmäjoukko täsmää
+  // tarkoitettuihin ryhmiin ja jossa ei ole päällekkäisyyksiä tai väärää valenssia.
   function generate(level, r = Math.random) {
     const Lv = LEVELS[level - 1];
-    for (let t = 0; t < 1000; t++) {
-      let ids = shuffle(Lv.pool, r).slice(0, ri(Lv.k, r)), para = null;
-      if (ids.includes('BENZENE') && ids.length > 2 && r() < Lv.para) {
-        para = ids.find(x => x !== 'BENZENE' && x !== 'CC_DOUBLE'); ids = ids.filter(x => x !== para);
+    for (let t = 0; t < 1500; t++) {
+      let ids = shuffle(Lv.pool, r).slice(0, ri(Lv.k, r)), para = null; const want = new Set();
+      if (ids.includes('PHENOL')) { ids = ids.filter(x => x !== 'PHENOL' && x !== 'BENZENE').concat('BENZENE'); para = 'OH'; want.add('PHENOL'); }
+      else if (ids.includes('BENZENE') && ids.length > 2 && r() < Lv.para) {
+        para = ids.find(x => !['BENZENE', 'CC_DOUBLE', 'CC_TRIPLE', 'OH'].includes(x)) || null;
+        if (para) ids = ids.filter(x => x !== para);
       }
+      ids.forEach(x => want.add(x)); if (para && para !== 'OH') want.add(para);
       const m = build(ids, ri(Lv.n, r), para, r);
       if (!m || !valid(m)) continue;
-      const want = new Set(ids.concat(para || [])), got = detect(m);
+      const got = detect(m);
       if (want.size === got.size && [...want].every(x => got.has(x))) { m.groups = [...got]; m.level = level; return m; }
     }
     throw new Error('Molekyylin luonti epäonnistui');
@@ -129,6 +154,6 @@
     o.push('M  END'); return o.join('\n');
   }
 
-  root.Chem = { GROUPS, LEVELS, L, generate, detect, hc, molfile };
+  root.Chem = { GROUPS, LEVELS, L, generate, detect, groupsOf, hc, molfile };
   if (typeof module !== 'undefined') module.exports = root.Chem;
 })(typeof window !== 'undefined' ? window : globalThis);

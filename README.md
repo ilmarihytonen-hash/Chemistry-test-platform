@@ -14,7 +14,7 @@ Kemian harjoitus: tunnista satunnaisesti luodun molekyylin funktionaaliset ryhm�
 
 ## Languages, license and terms
 - UI in **English, Finnish and Swedish** (`i18n.js`); the language is picked from the browser and can be changed at any time.
-- On first load the user must accept the **GPLv3 license and terms of use** (stored in `localStorage` under `fgq-consent-1`; bump the key to ask again).
+- On first load the user must accept the **GPLv3 license and terms of use** (stored in `localStorage` under `fgq-consent-2`; bump the key to ask again).
 - Add the full license text to the repo before releasing: `curl -o LICENSE https://www.gnu.org/licenses/gpl-3.0.txt`
 
 ## Ketcher (molecule opens directly in the editor)
@@ -31,3 +31,20 @@ Without the folder it falls back to copy and paste.
 - When the time is up the player gets a **result code**. The host pastes the codes into *Host → Result codes* to see the leaderboard (kept in the host's browser).
 - Result codes carry a checksum, so edited codes are rejected, but this is a light deterrent, not strong anti-cheat: there is no server.
 - Practice mode: leaving an unanswered molecule (New molecule or a difficulty button) now counts as a miss.
+
+## Live competition (host and players)
+- **Host** → *Create new code* opens a lobby. Players join with the code and a **single-use nickname** (unique in that competition, never saved; a kicked nickname stays blocked).
+- The host sees every player live and can **Start**, **End now**, **Kick** and switch a player to **observer** (observers see the live leaderboard but cannot score; after the start an observer can't become a player again).
+- Live play uses [PeerJS](https://peerjs.com) (WebRTC, pinned 1.5.4, loaded from jsDelivr) with its free public broker. It needs internet and a network that allows WebRTC; if it fails, the same code still works offline with result codes.
+- Scores are reported by the players' browsers, so a determined player could fake them. There is no rejoin once a round has started.
+- `node test.js` runs the host/player protocol against an in-memory fake of PeerJS.
+
+## Groups, levels and answers
+- **12 groups**: hydroxyl, phenol, carboxylic acid, C=C, C≡C, benzene, ether, ester, amine, amide, aldehyde, ketone (a phenol also contains a benzene ring, so both are listed in its answer).
+- **Hard and Expert** show no options: think of the groups, press *Show answer* and grade yourself. Competitions always show options so scoring is objective.
+- When an answer is shown, each group is **colour-coded** in the structure and in the group names.
+
+## Version and feedback
+- Edit `version.js` (`APP_VERSION`, currently `beta`) for each release; it appears in the bottom-right corner and in bug reports.
+- **Feedback / bug report** opens a pre-filled GitHub issue form (`.github/ISSUE_TEMPLATE/`) with version, language, browser and a molecule ID. On GitHub Pages the repository is detected automatically; otherwise set `APP_REPO` in `version.js`.
+- Open `index.html?mol=<ID>` to see exactly the molecule from a report.

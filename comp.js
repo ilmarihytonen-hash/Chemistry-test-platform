@@ -31,6 +31,6 @@
       return { c: String(o.c), n: String(o.n).slice(0, 16), s: n(o.s), a: n(o.a), k: n(o.k) };
     } catch (e) { return null; }
   }
-  root.Comp = { newCode, parse, level, molecule, points, makeResult, readResult };
+  root.Comp = { rng, newCode, parse, level, molecule, points, makeResult, readResult };
   if (typeof module !== 'undefined') module.exports = root.Comp;
 })(typeof window !== 'undefined' ? window : globalThis);
