@@ -12,14 +12,6 @@ Kemian harjoitus: tunnista satunnaisesti luodun molekyylin funktionaaliset ryhm�
 - On first load the user must accept the **GPLv3 license and terms of use** (stored in `localStorage` under `fgq-consent-2`; bump the key to ask again).
 - Add the full license text to the repo before releasing: `curl -o LICENSE https://www.gnu.org/licenses/gpl-3.0.txt`
 
-## Ketcher (molecule opens directly in the editor)
-The hosted Ketcher demo is a different website, so a molecule can only be pasted into it by hand (the button copies the Molfile).
-To make **Open in Ketcher** show the molecule automatically, host Ketcher yourself:
-1. Download the ready-to-run standalone build from the *Assets* of a release at https://github.com/epam/ketcher/releases
-2. Extract it into a `ketcher/` folder in this repo so that `ketcher/index.html` exists (keep Ketcher's own LICENSE and NOTICE files).
-3. Commit and push. The button then opens Ketcher in the page and loads the molecule through `ketcher.setMolecule()`.
-Without the folder it falls back to copy and paste.
-
 ## Competition mode (no server needed)
 - **Host**: Competition → Host → pick difficulty (1–4, or *rising*) and time → *Create new code* → give the code (e.g. `K7M2Q-R-10`) to the players.
 - **Players**: Competition → Join → name + code → *Start*. Everyone gets the **same molecules in the same order**. Points: 10 × level per correct answer, plus a streak bonus (up to +10). Skips and wrong answers give 0 and reset the streak. One attempt per code and device.
