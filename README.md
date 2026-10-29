@@ -5,12 +5,10 @@ Kemian harjoitus: tunnista satunnaisesti luodun molekyylin funktionaaliset ryhm�
 - **4 vaikeustasoa** (1–4 ryhmää, pidempi ketju, bentseenirenkaan sivuryhmät) ja **mukautuva tila**: 3 oikein putkeen nostaa tasoa, 2 väärin laskee sitä.
 - Molekyylit luodaan graafina ja **vastaus lasketaan graafista** (`chem.js › detect`), joten vastaus on aina oikea.
 - **Avaa Ketcherissä** kopioi Molfilen ja avaa [EPAM Ketcherin](https://github.com/epam/ketcher).
-- Testi: `node test.js`
 
 ## Languages, license and terms
 - UI in **English, Finnish and Swedish** (`i18n.js`); the language is picked from the browser and can be changed at any time.
 - On first load the user must accept the **GPLv3 license and terms of use** (stored in `localStorage` under `fgq-consent-2`; bump the key to ask again).
-- Add the full license text to the repo before releasing: `curl -o LICENSE https://www.gnu.org/licenses/gpl-3.0.txt`
 
 ## Competition mode (no server needed)
 - **Host**: Competition → Host → pick difficulty (1–4, or *rising*) and time → *Create new code* → give the code (e.g. `K7M2Q-R-10`) to the players.
